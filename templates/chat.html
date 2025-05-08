@@ -1,0 +1,29 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>CrediMate AI 챗봇</title>
+</head>
+<body>
+    <h2>CrediMate AI 챗봇</h2>
+    {% if session.student_id %}
+        <p>현재 교육원아이디: <strong>{{ session.student_id }}</strong> <a href="/reset">(변경)</a></p>
+        <form method="POST">
+            <label>질문:</label><br>
+            <input type="text" name="question" required style="width:300px;"><br><br>
+            <input type="submit" value="질문하기">
+        </form>
+    {% else %}
+        <form method="POST">
+            <label>교육원아이디:</label><br>
+            <input type="text" name="student_id" required><br><br>
+            <input type="submit" value="확인">
+        </form>
+    {% endif %}
+    <hr>
+    {% if message %}
+        <p><strong>응답:</strong><br>{{ message }}</p>
+    {% endif %}
+</body>
+</html>
