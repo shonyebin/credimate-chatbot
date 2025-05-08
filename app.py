@@ -21,7 +21,6 @@ def answer_from_sheet(df, user_id, question):
         student_row = df[df["교육원아이디"].astype(str) == user_id].iloc[0]
         if "교육원" in question:
             return f"{student_row['이름']}님은 현재 {student_row['교육원']} 교육원에 재학 중입니다."
-
         for column in df.columns:
             if column in ["교육원아이디", "이름", "교육원"]:
                 continue
@@ -37,6 +36,10 @@ def answer_from_sheet(df, user_id, question):
 
 def answer_from_gpt(question, mode="default"):
     try:
+        if "시험자료" in question:
+            return "https://naver.me/FW6MU4wD
+이수하시는 과목명에 맞춰 다운로드 해주세요."
+
         system_prompt = (
             "너는 학점은행제를 담당하는 교수로서 학생들에게 토론자료를 제공해주는 역할이야. "
             "그래서 이어진 문장으로 토론에 대한 주제로 내가 자료를 요청하면 "
@@ -82,9 +85,9 @@ def index():
                         answer = answer_from_gpt(question, mode="discussion")
                     else:
                         answer = answer_from_sheet(df, user_id, question)
-        if not answer or answer.strip() == '':
-            answer = "담당자를 통해 질문 남겨주시면 그에 맞춰 확인되는대로 신속한 답변 받아보실 수 있으실거에요 ^^ 화이팅입니다!"
-                            answer = answer_from_gpt(question)
+
+                    if not answer or answer.strip() == "":
+                        answer = "담당자를 통해 질문 남겨주시면 그에 맞춰 확인되는대로 신속한 답변 받아보실 수 있으실거에요 ^^ 화이팅입니다!"
 
                     session["chat_log"].append((question, answer))
             return render_template("chat.html", answer=answer)
