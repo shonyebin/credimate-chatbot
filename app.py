@@ -47,40 +47,44 @@ def answer_from_gpt(question, mode="default"):
             ]
         )
         return response.choices[0].message.content.strip()
-    except:
-        return "GPT 응답에 문제가 발생했습니다. 다시 시도해주세요."
+    except Exception as e:
+        return f"GPT 호출 실패: {e}"
 
 @app.route("/", methods=["GET", "POST"])
 def index():
+    if "chat_log" not in session:
+        session["chat_log"] = []
+
     if request.method == "POST":
         if "student_id" in request.form:
             session["student_id"] = request.form["student_id"]
+            session["chat_log"] = []
             return redirect("/")
         elif "question" in request.form and "student_id" in session:
             df = fetch_student_data()
             if df is None:
-                return render_template("chat.html", message="구글 시트를 불러올 수 없습니다.")
+                message = "구글 시트를 불러올 수 없습니다."
+                return render_template("chat.html", message=message)
             user_id = session["student_id"]
             if user_id not in df["교육원아이디"].astype(str).values:
-                return render_template("chat.html", message="등록되지 않은 교육원아이디입니다.")
+                message = "등록되지 않은 교육원아이디입니다."
+                return render_template("chat.html", message=message)
+
             question = request.form["question"]
 
             if "토론 작성해줘" in question or "이게 토론 주제야" in question:
-                gpt_answer = answer_from_gpt(question, mode="discussion")
-                return render_template("chat.html", message=gpt_answer)
-
-            sheet_answer = answer_from_sheet(df, user_id, question)
-            if sheet_answer:
-                return render_template("chat.html", message=sheet_answer)
+                answer = answer_from_gpt(question, mode="discussion")
             else:
-                gpt_answer = answer_from_gpt(question)
-                return render_template("chat.html", message=gpt_answer)
+                answer = answer_from_sheet(df, user_id, question)
+                if not answer:
+                    answer = answer_from_gpt(question)
+
+            session["chat_log"].append((question, answer))
+            return redirect("/")
+
     return render_template("chat.html")
 
 @app.route("/reset")
 def reset():
     session.clear()
     return redirect("/")
-
-if __name__ == "__main__":
-    app.run(debug=True)

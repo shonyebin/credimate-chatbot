@@ -1,29 +1,86 @@
 
 <!DOCTYPE html>
-<html>
+<html lang="ko">
 <head>
-    <meta charset="utf-8">
+    <meta charset="UTF-8">
     <title>CrediMate AI 챗봇</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f5f7fa;
+            font-family: 'Segoe UI', sans-serif;
+        }
+        .chat-container {
+            max-width: 720px;
+            margin: 40px auto;
+            padding: 30px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+        }
+        .chat-title {
+            font-size: 1.6rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #003366;
+        }
+        .chat-history {
+            max-height: 400px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+            border: 1px solid #dee2e6;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        .chat-message {
+            margin-bottom: 15px;
+        }
+        .user-question {
+            font-weight: bold;
+            color: #0056b3;
+        }
+        .bot-answer {
+            color: #343a40;
+        }
+    </style>
 </head>
 <body>
-    <h2>CrediMate AI 챗봇</h2>
-    {% if session.student_id %}
-        <p>현재 교육원아이디: <strong>{{ session.student_id }}</strong> <a href="/reset">(변경)</a></p>
-        <form method="POST">
-            <label>질문:</label><br>
-            <input type="text" name="question" required style="width:300px;"><br><br>
-            <input type="submit" value="질문하기">
-        </form>
-    {% else %}
-        <form method="POST">
-            <label>교육원아이디:</label><br>
-            <input type="text" name="student_id" required><br><br>
-            <input type="submit" value="확인">
-        </form>
-    {% endif %}
-    <hr>
-    {% if message %}
-        <p><strong>응답:</strong><br>{{ message }}</p>
-    {% endif %}
+    <div class="chat-container">
+        <div class="chat-title">CrediMate AI 챗봇</div>
+
+        {% if session.student_id %}
+            <div class="mb-3">
+                <span class="text-muted">현재 교육원아이디:</span> 
+                <strong>{{ session.student_id }}</strong>
+                <a href="/reset" class="ms-2">(변경)</a>
+            </div>
+            <form method="POST" class="mb-4">
+                <div class="mb-3">
+                    <input type="text" name="question" class="form-control" placeholder="질문을 입력하세요..." required>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">질문하기</button>
+            </form>
+        {% else %}
+            <form method="POST">
+                <div class="mb-3">
+                    <label class="form-label">교육원아이디</label>
+                    <input type="text" name="student_id" class="form-control" required>
+                </div>
+                <button type="submit" class="btn btn-success w-100">확인</button>
+            </form>
+        {% endif %}
+
+        {% if session.chat_log %}
+        <div class="chat-history">
+            {% for q, a in session.chat_log %}
+                <div class="chat-message">
+                    <div class="user-question">Q. {{ q }}</div>
+                    <div class="bot-answer">A. {{ a }}</div>
+                </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
 </body>
 </html>
