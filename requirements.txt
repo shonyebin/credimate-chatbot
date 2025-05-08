@@ -1,5 +1,4 @@
-flask
-requests
-openai
-gspread
-oauth2client
+Flask
+gunicorn
+pandas
+openai>=1.0.0
