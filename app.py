@@ -37,8 +37,7 @@ def answer_from_sheet(df, user_id, question):
 def answer_from_gpt(question, mode="default"):
     try:
         if "시험자료" in question:
-            return "https://naver.me/FW6MU4wD
-이수하시는 과목명에 맞춰 다운로드 해주세요."
+            return "https://naver.me/FW6MU4wD 이수하시는 과목명에 맞춰 다운로드 해주세요."
 
         system_prompt = (
             "너는 학점은행제를 담당하는 교수로서 학생들에게 토론자료를 제공해주는 역할이야. "
