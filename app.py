@@ -8,26 +8,28 @@ app = Flask(__name__)
 app.secret_key = "credimate_secret_key"
 
 openai.api_key = os.getenv("OPENAI_API_KEY")
-
 GOOGLE_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/1K4ts2bZ-96u315XDtIfoZF72N4CZ_5pWG3HO6-K7wko/export?format=csv"
 
 def fetch_student_data():
     try:
         return pd.read_csv(GOOGLE_SHEET_CSV_URL)
-    except:
+    except Exception as e:
         return None
 
 def answer_from_sheet(df, user_id, question):
-    student_row = df[df["교육원아이디"].astype(str) == user_id].iloc[0]
-    for column in df.columns:
-        if column in ["교육원아이디", "이름", "교육원"]:
-            continue
-        keyword = column.replace(" ", "").replace("시작", "").replace("종료", "")
-        if keyword in question.replace(" ", ""):
-            value = student_row[column]
-            if pd.isna(value):
+    try:
+        student_row = df[df["교육원아이디"].astype(str) == user_id].iloc[0]
+        for column in df.columns:
+            if column in ["교육원아이디", "이름", "교육원"]:
                 continue
-            return f"{student_row['이름']}님, {column}은(는) {value}입니다."
+            keyword = column.replace(" ", "").replace("시작", "").replace("종료", "")
+            if keyword in question.replace(" ", ""):
+                value = student_row[column]
+                if pd.isna(value):
+                    continue
+                return f"{student_row['이름']}님, {column}은(는) {value}입니다."
+    except Exception as e:
+        return f"[학사일정 오류: {str(e)}]"
     return None
 
 def answer_from_gpt(question, mode="default"):
@@ -48,12 +50,14 @@ def answer_from_gpt(question, mode="default"):
         )
         return response.choices[0].message.content.strip()
     except Exception as e:
-        return f"GPT 호출 실패: {e}"
+        return f"[GPT 호출 실패: {str(e)}]"
 
 @app.route("/", methods=["GET", "POST"])
 def index():
     if "chat_log" not in session:
         session["chat_log"] = []
+
+    answer = None
 
     if request.method == "POST":
         if "student_id" in request.form:
@@ -63,24 +67,23 @@ def index():
         elif "question" in request.form and "student_id" in session:
             df = fetch_student_data()
             if df is None:
-                message = "구글 시트를 불러올 수 없습니다."
-                return render_template("chat.html", message=message)
-            user_id = session["student_id"]
-            if user_id not in df["교육원아이디"].astype(str).values:
-                message = "등록되지 않은 교육원아이디입니다."
-                return render_template("chat.html", message=message)
-
-            question = request.form["question"]
-
-            if "토론 작성해줘" in question or "이게 토론 주제야" in question:
-                answer = answer_from_gpt(question, mode="discussion")
+                answer = "구글 시트를 불러올 수 없습니다."
             else:
-                answer = answer_from_sheet(df, user_id, question)
-                if not answer:
-                    answer = answer_from_gpt(question)
+                user_id = session["student_id"]
+                if user_id not in df["교육원아이디"].astype(str).values:
+                    answer = "등록되지 않은 교육원아이디입니다."
+                else:
+                    question = request.form["question"]
 
-            session["chat_log"].append((question, answer))
-            return redirect("/")
+                    if "토론 작성해줘" in question or "이게 토론 주제야" in question:
+                        answer = answer_from_gpt(question, mode="discussion")
+                    else:
+                        answer = answer_from_sheet(df, user_id, question)
+                        if not answer:
+                            answer = answer_from_gpt(question)
+
+                    session["chat_log"].append((question, answer))
+            return render_template("chat.html", answer=answer)
 
     return render_template("chat.html")
 
