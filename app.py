@@ -1,53 +1,52 @@
-from flask import Flask, render_template, request, session, jsonify
-from datetime import datetime
+
+from flask import Flask, request, render_template
+import pandas as pd
 
 app = Flask(__name__)
-app.secret_key = 'credimate-secret'
 
-student_schedule = {
-    "홍길동": {
-        "개강일": "2025-06-01",
-        "중간평가": "2025-06-15",
-        "종강일": "2025-06-30"
-    },
-    "김영희": {
-        "개강일": "2025-07-01",
-        "중간평가": "2025-07-15",
-        "종강일": "2025-07-31"
-    }
-}
+# Google Sheets CSV 링크 (공유 시트 → File > Share > Anyone with the link)
+GOOGLE_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/1K4ts2bZ-96u315XDtIfoZF72N4CZ_5pWG3HO6-K7wko/export?format=csv"
 
-def generate_response(student, message):
-    message = message.strip().lower()
-    data = student_schedule.get(student, {})
+def fetch_student_data():
+    try:
+        df = pd.read_csv(GOOGLE_SHEET_CSV_URL)
+        return df
+    except Exception as e:
+        return None
 
-    if any(key in message for key in ["개강", "시작"]):
-        return f"{student}님, 개강일은 {data.get('개강일', '등록되지 않음')}입니다."
-    elif "중간" in message:
-        return f"{student}님, 중간평가는 {data.get('중간평가', '등록되지 않음')} 예정입니다."
-    elif any(key in message for key in ["종강", "끝"]):
-        return f"{student}님, 종강일은 {data.get('종강일', '등록되지 않음')}입니다."
-    elif "상담" in message:
-        return f"상담 관련 문의는 담당자에게 연결해 드릴게요."
-    else:
-        return f"죄송해요. 정확한 정보를 찾을 수 없어요. 관리자에게 문의해 주세요."
+@app.route("/", methods=["GET", "POST"])
+def chatbot():
+    message = ""
+    student_name = ""
+    if request.method == "POST":
+        user_id = request.form.get("student_id")
+        question = request.form.get("question")
 
-@app.route("/")
-def index():
-    return render_template("index.html")
+        df = fetch_student_data()
+        if df is None:
+            message = "학사일정 데이터를 불러오는 데 실패했습니다."
+        elif user_id not in df["교육원아이디"].astype(str).values:
+            message = "입력하신 교육원아이디가 존재하지 않습니다."
+        else:
+            student_row = df[df["교육원아이디"].astype(str) == user_id].iloc[0]
+            student_name = student_row["이름"]
+            matched = False
 
-@app.route("/start", methods=["POST"])
-def start():
-    student = request.form.get("name")
-    session['student'] = student
-    return jsonify({"message": f"안녕하세요, {student}님! 무엇이 궁금하신가요?"})
+            for column in df.columns:
+                if column == "교육원아이디" or column == "이름" or column == "교육원":
+                    continue
+                if column.replace(" ", "")[:-2] in question.replace(" ", ""):
+                    value = student_row[column]
+                    if pd.isna(value):
+                        continue
+                    message = f"{student_name}님, {column}은(는) {value}입니다."
+                    matched = True
+                    break
 
-@app.route("/ask", methods=["POST"])
-def ask():
-    student = session.get('student')
-    message = request.form.get("message")
-    answer = generate_response(student, message)
-    return jsonify({"answer": answer})
+            if not matched:
+                message = "질문을 이해하지 못했어요. 일정명(예: 복습시험, 과제, 토론 등)을 포함해주세요."
 
-if __name__ == '__main__':
+    return render_template("index.html", message=message, name=student_name)
+
+if __name__ == "__main__":
     app.run(debug=True)
