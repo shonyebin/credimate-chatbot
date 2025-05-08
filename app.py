@@ -19,6 +19,9 @@ def fetch_student_data():
 def answer_from_sheet(df, user_id, question):
     try:
         student_row = df[df["교육원아이디"].astype(str) == user_id].iloc[0]
+        if "교육원" in question:
+            return f"{student_row['이름']}님은 현재 {student_row['교육원']} 교육원에 재학 중입니다."
+
         for column in df.columns:
             if column in ["교육원아이디", "이름", "교육원"]:
                 continue
