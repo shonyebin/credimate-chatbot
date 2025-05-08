@@ -1,19 +1,19 @@
 
 from flask import Flask, request, render_template, session, redirect
 import pandas as pd
-import openai
+from openai import OpenAI
 import os
 
 app = Flask(__name__)
 app.secret_key = "credimate_secret_key"
 
-openai.api_key = os.getenv("OPENAI_API_KEY")
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 GOOGLE_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/1K4ts2bZ-96u315XDtIfoZF72N4CZ_5pWG3HO6-K7wko/export?format=csv"
 
 def fetch_student_data():
     try:
         return pd.read_csv(GOOGLE_SHEET_CSV_URL)
-    except Exception as e:
+    except:
         return None
 
 def answer_from_sheet(df, user_id, question):
@@ -41,7 +41,7 @@ def answer_from_gpt(question, mode="default"):
             "글자수는 400자를 넘겨줘."
         ) if mode == "discussion" else "당신은 친절하고 정확한 교육 상담 챗봇입니다."
 
-        response = openai.ChatCompletion.create(
+        response = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[
                 {"role": "system", "content": system_prompt},
