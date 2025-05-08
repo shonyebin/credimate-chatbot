@@ -84,7 +84,7 @@ def index():
                         answer = answer_from_sheet(df, user_id, question)
         if not answer or answer.strip() == '':
             answer = "담당자를 통해 질문 남겨주시면 그에 맞춰 확인되는대로 신속한 답변 받아보실 수 있으실거에요 ^^ 화이팅입니다!"
-                            answer = answer_from_gpt(question)
+                                answer = answer_from_gpt(question)
 
                     session["chat_log"].append((question, answer))
             return render_template("chat.html", answer=answer)
