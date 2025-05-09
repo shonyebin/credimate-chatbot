@@ -1,19 +1,14 @@
 <!doctype html>
 <html lang="ko">
-  <head>
-    <meta charset="utf-8">
-    <title>Credimate 챗봇</title>
-  </head>
+  <head><meta charset="utf-8"><title>CrediMate Chat</title></head>
   <body>
-    <h2>질문하기</h2>
+    <h2>CrediMate 질문창</h2>
     <form method="post">
-      <input type="text" name="question" placeholder="질문을 입력하세요">
+      <input type="text" name="question" placeholder="질문 입력">
       <button type="submit">전송</button>
     </form>
     {% if answer %}
-      <div>
-        <strong>답변:</strong> {{ answer }}
-      </div>
+      <div><strong>답변:</strong> {{ answer }}</div>
     {% endif %}
   </body>
 </html>
