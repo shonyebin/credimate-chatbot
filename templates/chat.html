@@ -1,1 +1,17 @@
-<!DOCTYPE html><html><head><title>CrediMate</title></head><body><h1>CrediMate 질문창</h1><form method='post'><input name='question' placeholder='질문 입력'><button type='submit'>전송</button></form><div>{{ answer }}</div></body></html>
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>CrediMate 질문창</title>
+</head>
+<body>
+    <h1>CrediMate 질문창</h1>
+    <form method="post">
+        <input type="text" name="question" placeholder="질문 입력" required>
+        <button type="submit">전송</button>
+    </form>
+    {% if answer %}
+        <p><strong>응답:</strong> {{ answer }}</p>
+    {% endif %}
+</body>
+</html>
