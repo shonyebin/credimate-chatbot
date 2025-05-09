@@ -1,17 +1,37 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>CrediMate 질문창</title>
+    <title>CrediMate 챗봇</title>
+    <style>
+        body { font-family: sans-serif; margin: 2em; }
+        .box { border: 1px solid #ccc; padding: 1em; border-radius: 8px; }
+        .response { margin-top: 1em; background: #f0f0f0; padding: 1em; border-radius: 6px; white-space: pre-wrap; }
+        .tip { font-size: 0.9em; color: gray; margin-bottom: 1em; }
+    </style>
+    <script>
+        async function sendMessage() {
+            const input = document.getElementById("message").value;
+            const res = await fetch("/ask", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ message: input })
+            });
+            const data = await res.json();
+            document.getElementById("response").innerText = data.response;
+        }
+    </script>
 </head>
 <body>
-    <h1>CrediMate 질문창</h1>
-    <form method="post">
-        <input type="text" name="question" placeholder="질문 입력" required>
-        <button type="submit">전송</button>
-    </form>
-    {% if answer %}
-        <p><strong>응답:</strong> {{ answer }}</p>
-    {% endif %}
+    <h1>CrediMate 관리 시스템</h1>
+    <div class="tip">
+        🔹 사용 예시: 토론 작성해줘: AI 윤리교육은 필요한가?<br>
+        📘 학습자명: <strong>{{ student['이름'] }}</strong>, 교육원: {{ student['교육원'] }}<br>
+        📅 개강일: {{ student['개강일'] }}, 복습시험: {{ student['복습시험시작'] }} ~ {{ student['복습시험종료'] }}
+    </div>
+    <div class="box">
+        <input type="text" id="message" placeholder="질문을 입력하세요..." style="width: 80%;">
+        <button onclick="sendMessage()">질문하기</button>
+        <div class="response" id="response"></div>
+    </div>
 </body>
 </html>
