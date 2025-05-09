@@ -1,4 +1,4 @@
-flask
+Flask
+gunicorn
 pandas
-openai
-requests
+openai>=1.0.0
