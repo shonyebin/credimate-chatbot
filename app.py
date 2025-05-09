@@ -3,7 +3,7 @@ import openai
 
 app = Flask(__name__)
 
-openai.api_key = "sk-proj-xxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+openai.api_key = "sk-proj-LBBNz8QaZKjVvsncB380T3BlbkFJxQPBjZ2uvZs5iFAlR6dC"
 
 @app.route("/", methods=["GET", "POST"])
 def chat():
@@ -11,7 +11,7 @@ def chat():
     if request.method == "POST":
         question = request.form["question"]
         if "시험자료" in question:
-            answer = "이수하시는 과목명에 맞춰 다운로드 해주세요."
+            answer = "https://naver.me/FW6MU4wD 이수하시는 과목명에 맞춰 다운로드 해주세요"
         elif "소속" in question:
             answer = "재학 중입니다"
         elif "교육원이 어디야" in question or "교육원" in question:
