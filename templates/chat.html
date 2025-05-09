@@ -1,22 +1,19 @@
-
-<!DOCTYPE html>
-<html>
-<head>
-    <title>CrediMate Chatbot</title>
-</head>
-<body>
-    <h1>CrediMate 관리 시스템</h1>
-    <form method="POST">
-        <p>예시 명령어: <strong>"시험자료"</strong>, <strong>"학사일정"</strong> 등</p>
-        <input type="text" name="question" placeholder="질문을 입력하세요">
-        <button type="submit">질문하기</button>
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8">
+    <title>Credimate 챗봇</title>
+  </head>
+  <body>
+    <h2>질문하기</h2>
+    <form method="post">
+      <input type="text" name="question" placeholder="질문을 입력하세요">
+      <button type="submit">전송</button>
     </form>
     {% if answer %}
-    <div>
-        <h3>Q. {{ request.form['question'] }}</h3>
-        <p>A. {{ answer }}</p>
-        <button onclick="navigator.clipboard.writeText('{{ answer }}')">복사하기</button>
-    </div>
+      <div>
+        <strong>답변:</strong> {{ answer }}
+      </div>
     {% endif %}
-</body>
+  </body>
 </html>
