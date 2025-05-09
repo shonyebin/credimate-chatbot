@@ -3,11 +3,7 @@ import pandas as pd
 import openai
 
 app = Flask(__name__)
-
-# GPT API 키
 openai.api_key = "sk-proj-LBBNz8QaZKjVvsncB380T3BlbkFJxQPBjZ2uvZs5iFAlR6dC"
-
-# 시트 연동
 SHEET_URL = 'https://docs.google.com/spreadsheets/d/1K4ts2bZ-96u315XDtIfoZF72N4CZ_5pWG3HO6-K7wko/export?format=csv'
 
 def load_student_data():
@@ -23,21 +19,16 @@ def generate_debate(prompt):
     )
     return completion.choices[0].message.content.strip()
 
-def match_schedule_from_sheet(student, message):
+def match_schedule(student, message):
     mapping = {
-        "개강": "개강일",
-        "복습시작": "복습시험시작",
-        "복습끝": "복습시험종료",
-        "토론시작": "토론시작",
-        "토론종료": "토론종료",
-        "중간": "중간시작",
-        "중간종료": "중간종료",
-        "과제시작": "과제시작",
-        "과제종료": "과제종료",
+        "개강": "개강일", "복습시작": "복습시험시작", "복습종료": "복습시험종료",
+        "과제시작": "과제시작", "과제종료": "과제종료",
+        "중간": "중간시작", "중간종료": "중간종료",
+        "토론시작": "토론시작", "토론종료": "토론종료"
     }
-    for keyword, col in mapping.items():
-        if keyword in message:
-            return f"{keyword} 일정은 {student.get(col, '등록되지 않음')}입니다."
+    for k, col in mapping.items():
+        if k in message:
+            return f"{k} 일정은 {student.get(col, '등록되지 않음')}입니다."
     return None
 
 @app.route('/')
@@ -64,13 +55,12 @@ def ask():
     message = data.get("message")
     student = data.get("student")
 
-    schedule_reply = match_schedule_from_sheet(student, message)
-    if schedule_reply:
-        return jsonify({"response": schedule_reply})
+    schedule = match_schedule(student, message)
+    if schedule:
+        return jsonify({"response": schedule})
 
     if "토론" in message:
         reply = generate_debate(message.replace("토론 작성해줘:", "").strip())
     else:
         reply = f"Q. {message}\nA. '{message}'에 대한 일반적인 응답입니다."
-
     return jsonify({"response": reply})

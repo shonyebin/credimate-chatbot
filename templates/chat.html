@@ -9,25 +9,29 @@
             const res = await fetch("/ask", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ message: input, student: {{ student|tojson }} })
+                body: JSON.stringify({ message: input, student: {{ student | tojson }} })
             });
             const data = await res.json();
-            document.getElementById("response").innerText = data.response;
+            document.getElementById("qa").innerHTML = 
+                "<strong>Q. " + input + "</strong><br><strong>A.</strong> " + data.response;
         }
     </script>
 </head>
-<body class="container mt-5">
-    <h2>CrediMate 학사 챗봇</h2>
-    <div class="card mb-3">
-        <div class="card-body">
-            <h5 class="card-title">{{ student['이름'] }} 님 ({{ student['교육원'] }})</h5>
-            <p class="card-text">개강일: {{ student['개강일'] }} / 토론기간: {{ student['토론시작'] }} ~ {{ student['토론종료'] }}</p>
-        </div>
+<body class="container mt-4">
+    <h2><strong>CrediMate 관리 시스템</strong></h2>
+    <div class="alert alert-light">
+        <ul>
+            <li>📌 <strong>학사일정을 알고 싶다면?</strong> → 기말평가는 언제야?</li>
+            <li>📌 <strong>토론글을 받고 싶다면?</strong> → 토론 작성해줘: AI 윤리교육은 필요한가</li>
+            <li>📌 <strong>시험자료를 원한다면?</strong> → 시험자료</li>
+        </ul>
+        <small class="text-muted">※ 학습자등록: 1월, 4월, 7월, 10월 / 학위신청: 1월, 7월</small>
     </div>
-    <div class="mb-3">
-        <input type="text" id="message" class="form-control" placeholder="질문을 입력하세요... 예: 토론시작은?">
+    <p><strong>현재 교육원아이디:</strong> {{ student['교육원아이디'] }}</p>
+    <div class="input-group mb-3">
+        <input id="message" type="text" class="form-control" placeholder="질문을 입력하세요...">
+        <button class="btn btn-primary" onclick="sendMessage()">질문하기</button>
     </div>
-    <button onclick="sendMessage()" class="btn btn-primary mb-3">질문하기</button>
-    <div class="alert alert-secondary" id="response"></div>
+    <div class="p-3 bg-light border rounded" id="qa"></div>
 </body>
 </html>
