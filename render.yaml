@@ -1,6 +1,7 @@
 services:
   - type: web
-    name: credimate
+    name: credimate-chatbot
     env: python
-    buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn app:app
+    plan: free
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "gunicorn app:gunicorn_app"

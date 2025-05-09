@@ -1,5 +1,5 @@
 flask
-requests
+openai
 gspread
 oauth2client
 gunicorn
